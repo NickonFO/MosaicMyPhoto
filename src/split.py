@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import matplotlib as plt
+from matplotlib import pyplot
 import pylab as pyl
 from PIL import Image
 from PIL import ImagePalette
@@ -34,14 +35,41 @@ def getAverageRGB(image):
 
 """
 def splitImage(Image,scaleFactor):
+    """
+    Method to split image into blocks and display pixel values of the blocks
+    using np array and strides
+    """
     img = np.array(Image)
     sf = scaleFactor
-    width, height = Image.shape[:2]
+    width, height, col_pixels = Image.shape[:3] # W,h, channels
     shape = (height - sf+1, width - sf + 1, sf, sf)
     size = img.itemsize
     strides = (width* size, size, width*size,size)
     blocks = np.lib.stride_tricks.as_strided(img, shape = shape, strides=strides)
+    #pyplot.imshow(img, interpolation='nearest')
+    #pyplot.show()
     print (blocks[1,1])
+    print()
+
+    """
+    This part of method accesses the colour of the pixels in each block
+
+    """
+
+    all_pixels = np.empty((0,3),int)
+    for x in range(sf):
+        for y in range(sf):
+            col_pixel= [img[x,y]] # Read pixel colour
+
+            all_pixels = np.concatenate( (all_pixels,col_pixel),axis=0)
+    print(all_pixels.shape)
+    print (all_pixels)
+    col_avg = np.mean(all_pixels, axis=0)
+    for x in range(sf):
+        for y in range(sf):
+            img[x,y] = col_avg
+    pyplot.imshow(img, interpolation='nearest')
+    pyplot.show()
 
 def main():
    img = cv.imread(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Original Dog image.png')
@@ -50,12 +78,10 @@ def main():
    # w =900, h = 1440
 #   width,height,channels = img.shape[:3]
  #  strides = (width* size, size, width*size,size)
-   splitImage(img,8)
+   splitImage(img,100)
   # new_col = [0,0,0]
    #no_pixels = width * height
    #scale_Factor = 8
-   #shape = (height - scale_Factor+1, width - scale_Factor+1, scale_Factor,scale_Factor)
-   #size = img_Array.itemsize
 
    # Make a grid
    #dx,dy = scale_Factor
@@ -78,6 +104,7 @@ def main():
 
   # print(no_pixels)
    cv.imshow("Original Dog image.png",img)
+
    cv.waitKey(0)
 
 
