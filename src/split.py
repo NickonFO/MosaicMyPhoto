@@ -8,68 +8,100 @@ from PIL import ImagePalette
 from statistics import mean
 #https://stackoverflow.com/questions/20368413/draw-grid-lines-over-an-image-in-matplotlib
 #https://stackoverflow.com/questions/19062875/how-to-get-the-number-of-channels-from-an-image-in-opencv-2
-
-# Downsample the image and replace tiles with average rgb tiles
-# Get the average rgb
-def getAverageRGB(image):
-  """
-  Given PIL Image, return average value of color as (r, g, b)
-  """
-  # get image as numpy array
-  im = np.array(image)
-  # get shape
-  w,h,d = im.shape
-  # get average
-  return tuple(np.average(im.reshape(w*h, d), axis=0))
-
-# split the image into tiles
-"""def splitImage(image, width, height):
-    width = image.size[0]
-    height = image.size[1]
-
-    for i in range (0,width):
-        for j in (0,height):
-            current_col = image.getpixel((i,j))
-            image.putpixel((x,y),getAverageRGB(image))
-    return image
-
-"""
+#https://stackoverflow.com/questions/13167269/changing-pixel-color-python
 def splitImage(Image,scaleFactor):
     """
     Method to split image into blocks and display pixel values of the blocks
     using np array and strides
     """
     img = np.array(Image)
+
+
     sf = scaleFactor
     width, height, col_pixels = Image.shape[:3] # W,h, channels
+    no_pixels = width * height
+    print(no_pixels)
+    no_blocks = no_pixels / (sf * sf)
     shape = (height - sf+1, width - sf + 1, sf, sf)
     size = img.itemsize
     strides = (width* size, size, width*size,size)
     blocks = np.lib.stride_tricks.as_strided(img, shape = shape, strides=strides)
     #pyplot.imshow(img, interpolation='nearest')
     #pyplot.show()
+    #no_blocks = 3
     print (blocks[1,1])
     print()
+    #print(width / 8)
+    #print(height/ 8)
+    #count = 0
 
     """
     This part of method accesses the colour of the pixels in each block
 
     """
+################################################################################
 
     all_pixels = np.empty((0,3),int)
-    for x in range(sf):
-        for y in range(sf):
-            col_pixel= [img[x,y]] # Read pixel colour
 
-            all_pixels = np.concatenate( (all_pixels,col_pixel),axis=0)
-    print(all_pixels.shape)
-    print (all_pixels)
-    col_avg = np.mean(all_pixels, axis=0)
-    for x in range(sf):
-        for y in range(sf):
-            img[x,y] = col_avg
-    pyplot.imshow(img, interpolation='nearest')
-    pyplot.show()
+    #x_block = [x*no_pixels for x in range(sf)]
+    #while count < no_blocks:
+    print(width)
+    print(height)
+    #for w in range(0, width, sf):
+    for w in range(0, width, sf):
+        for h in range(0, height, sf):
+            all_pixels = np.empty((0,3),int)
+            #temp_tuple = np.empty((49,3),int)
+            for x in range(sf):
+                #print(z+x)
+                for y in range(sf):
+
+                    col_pixel= [img[x + w, h + y]] # Read pixel colour
+                    all_pixels = np.concatenate((all_pixels,col_pixel),axis=0)
+                    print(all_pixels)
+            #        print(temp_tuple)
+            #        temp_tuple = temp_tuple + all_pixels
+            #col_avg = temp_tuple / cf
+
+                    #count = count + 1
+            #print(all_pixels.shape)
+
+
+            #print(col_pixels)
+            #print()
+            #print (all_pixels)
+
+
+                    col_avg = np.mean(all_pixels, axis=0) # find average colour of each block
+            #print()
+            #print(col_avg)
+                    #col_avg = (50,50,50)
+            # Place average colour of block in the image
+
+            for x in range(sf):
+                for y in range(sf):
+                    img[x + w,h + y] = col_avg
+
+            #z = z + sf
+            if h+2*sf > height:
+                break;
+        if w + 2*sf > width:
+            break;
+
+
+
+######################################################################
+
+
+
+
+        #if w + sf >= width - sf:
+        #    break;
+################################################################################
+
+
+    cv.imshow("img",img)
+
 
 def main():
    img = cv.imread(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Original Dog image.png')
@@ -78,7 +110,7 @@ def main():
    # w =900, h = 1440
 #   width,height,channels = img.shape[:3]
  #  strides = (width* size, size, width*size,size)
-   splitImage(img,100)
+   splitImage(img,50)
   # new_col = [0,0,0]
    #no_pixels = width * height
    #scale_Factor = 8
@@ -103,7 +135,7 @@ def main():
 
 
   # print(no_pixels)
-   cv.imshow("Original Dog image.png",img)
+  # cv.imshow("Original Dog image.png",img)
 
    cv.waitKey(0)
 
