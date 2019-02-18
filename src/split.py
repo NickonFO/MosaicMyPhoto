@@ -1,14 +1,28 @@
 import numpy as np
+import scipy as sc
 import cv2 as cv
 import matplotlib as plt
 from matplotlib import pyplot
 import pylab as pyl
+import PIL
 from PIL import Image
 from PIL import ImagePalette
 from statistics import mean
 #https://stackoverflow.com/questions/20368413/draw-grid-lines-over-an-image-in-matplotlib
 #https://stackoverflow.com/questions/19062875/how-to-get-the-number-of-channels-from-an-image-in-opencv-2
 #https://stackoverflow.com/questions/13167269/changing-pixel-color-python
+
+def averageRGB(Image):
+    """
+    Given a single Image, return avg colour (r,g,b)
+    """
+    img = np.array(Image)
+    width, height, col_pixels = img.shape[:3]
+    img.shape = (width * height,col_pixels)
+
+    return tuple(np.mean(img,axis=0))
+
+
 def splitImage(Image,scaleFactor):
     """
     Method to split image into blocks and display pixel values of the blocks
@@ -35,14 +49,17 @@ def splitImage(Image,scaleFactor):
     #print(height/ 8)
     #count = 0
 
+def replace_image_with_avgs(Image,scaleFactor):
     """
-    This part of method accesses the colour of the pixels in each block
-
+    Feature extraction -
+    accesses the colour of the pixels in each block,
+    replaces tiles with average RGB
     """
-################################################################################
-
+    sf = scaleFactor
     all_pixels = np.empty((0,3),int)
-
+    img = np.array(Image)
+    width, height, col_pixels = Image.shape[:3] # W,h, channels
+    no_pixels = width * height
     #x_block = [x*no_pixels for x in range(sf)]
     #while count < no_blocks:
     print(width)
@@ -58,7 +75,7 @@ def splitImage(Image,scaleFactor):
 
                     col_pixel= [img[x + w, h + y]] # Read pixel colour
                     all_pixels = np.concatenate((all_pixels,col_pixel),axis=0)
-                    print(all_pixels)
+                    #print(all_pixels)
             #        print(temp_tuple)
             #        temp_tuple = temp_tuple + all_pixels
             #col_avg = temp_tuple / cf
@@ -72,10 +89,13 @@ def splitImage(Image,scaleFactor):
             #print (all_pixels)
 
 
+                    #sumRGB = [(x[0]*x[1][0], x[0]*x[1][1], x[0]*x[1][2]) for x in all_pixels]
+                    #col_avg = tuple([sum(x)/no_pixels for x in zip(*sumRGB)])
+
                     col_avg = np.mean(all_pixels, axis=0) # find average colour of each block
             #print()
-            #print(col_avg)
-                    #col_avg = (50,50,50)
+        #    print(col_avg)
+
             # Place average colour of block in the image
 
             for x in range(sf):
@@ -100,7 +120,12 @@ def splitImage(Image,scaleFactor):
 ################################################################################
 
 
+    # Save image of avgs
+    #cv.imwrite(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\AVGS.jpg',img)
     cv.imshow("img",img)
+
+def searchTileDB(ImageDir)
+
 
 
 def main():
@@ -111,6 +136,7 @@ def main():
 #   width,height,channels = img.shape[:3]
  #  strides = (width* size, size, width*size,size)
    splitImage(img,50)
+   replace_image_with_avgs(img,50)
   # new_col = [0,0,0]
    #no_pixels = width * height
    #scale_Factor = 8
