@@ -47,17 +47,34 @@ def splitVideoIntoFrames(videoFile):
     """
     Split video into frames and save in a directory
     """
+    print("Splitting video into individual frames...")
+    #print
     cap = cv.VideoCapture(videoFile)
     count = 0
     while cap.isOpened():
         ret,frame = cap.read()
         cv.imshow('frame',frame)
         cv.imwrite("frames%d.jpg" % count, frame)
-        count = count + 1
-        if cv.waitKey(10) & 0xFF == ord('q'):
-            break
+        count += 1
+        if cv.waitKey(5) & 0xFF == ord('q'):
+            break;
+        if count > 27:
+            break;
+        #    pass
     cap.release()
     cv.destroyAllWindows()  # destroy all the opened windows
+
+# def splitVideoIntoFrames(gif,dir):
+#     frame = Image.open(gif)
+#     nframes = 0;
+#     while frame:
+#         frame.save( '%s/%s-%s.jpg' % (dir, os.path.basename(gif), nframes ) , 'GIF')
+#         nframes +=1
+#         try:
+#             frame.seek(nframes)
+#         except EOFError:
+#                 break;
+#         return True
 
 def replace_image_with_avgs(Image,scaleFactor):
     """
@@ -65,30 +82,26 @@ def replace_image_with_avgs(Image,scaleFactor):
     accesses the colour of the pixels in each block,
     replaces tiles with average RGB
     """
+
     sf = scaleFactor
     all_pixels = np.empty((0,3),int)
     img = np.array(Image)
+
     width, height, col_pixels = Image.shape[:3] # W,h, channels
     no_pixels = width * height
-    #x_block = [x*no_pixels for x in range(sf)]
-    #while count < no_blocks:
-    print(width)
-    print(height)
-    #for w in range(0, width, sf):
+
     for w in range(0, width, sf):
         for h in range(0, height, sf):
             all_pixels = np.empty((0,3),int)
-            #temp_tuple = np.empty((49,3),int)
+
             for x in range(sf):
-                #print(z+x)
+
                 for y in range(sf):
 
                     col_pixel= [img[x + w, h + y]] # Read pixel colour
                     all_pixels = np.concatenate((all_pixels,col_pixel),axis=0)
-
+                    #col_avg = (50,50,32)
                     col_avg = np.mean(all_pixels, axis=0) # Averaging is O(no_blocks) #2mins # find average colour of each block
-            #print()
-        #    print(col_avg)
 
             # Place average colour of block in the image
 
@@ -105,34 +118,44 @@ def replace_image_with_avgs(Image,scaleFactor):
 
     # Save image of avgs
     #cv.imwrite(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\VideoFrames\AVGS.jpg',img)
+    return img
     cv.imshow("img",img)
 
+def process_On_Video_Frames(imgDir):
+    print("Processing on video frames....")
+    count = 0
+    for img in glob.iglob(imgDir + r'\*.jpg'):
+        image = cv.imread(img)
+        new_image = replace_image_with_avgs(image,8)
+        cv.imwrite("Avg_frames%d.jpg" % count, new_image)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+        count = count + 1
 
-
-def processOnVideoFrames(fileDir):
-    """
-    Process on the frames individually
-    """
-    for (i, image) in enumerate(glob.iglob(fileDir)):
-        replace_image_with_avgs(image, 8)
 
 def create_gif(input_imgDir, output_Dir):
     """
     Join individual frames to form a video
     """
+    print("Creating gif....")
     images = []
     filenames = os.listdir(input_imgDir)
     for filename in filenames:
-        if filename.endswith('.jpg'):
-            path = os.path.join(input_imgDir,filename)
-            images.append(imageio.imread(path))
+        if filename.startswith('Avg_frames'):
+            if filename.endswith('.jpg'):
+                path = os.path.join(input_imgDir,filename)
+                images.append(imageio.imread(path))
+                #print(images)
     imageio.mimsave(output_Dir, images)
 
 def main():
 
     #playVideo("concert2.gif")
-    #getFrameCount("concert2.gif")
-    #splitVideoIntoFrames("concert2.gif")
-    #processOnVideoFrames(r"C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\VideoFrames\*.jpg")
-    #create_gif(r"C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\VideoFrames","C:\\Users\\NFO\\Desktop\\Uni\\3rd Year\\3rd year project rescources\\Code\\VideoFrames\\movie.gif")
+
+    splitVideoIntoFrames("concert2.gif")
+
+    process_On_Video_Frames(r"C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Video frames")
+    create_gif(r"C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Video frames","movie.gif")
+
+
 main()
