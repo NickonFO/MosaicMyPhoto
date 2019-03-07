@@ -5,23 +5,14 @@ import matplotlib as plt
 from matplotlib import pyplot
 import pylab as pyl
 import PIL
+import glob
+import os
 from PIL import Image
 from PIL import ImagePalette
 from statistics import mean
 #https://stackoverflow.com/questions/20368413/draw-grid-lines-over-an-image-in-matplotlib
 #https://stackoverflow.com/questions/19062875/how-to-get-the-number-of-channels-from-an-image-in-opencv-2
 #https://stackoverflow.com/questions/13167269/changing-pixel-color-python
-
-def averageRGB(Image):
-    """
-    Given a single Image, return avg colour (r,g,b)
-    """
-    img = np.array(Image)
-    width, height, col_pixels = img.shape[:3]
-    img.shape = (width * height,col_pixels)
-
-    return tuple(np.mean(img,axis=0))
-
 
 def splitImage(Image,scaleFactor):
     """
@@ -48,8 +39,9 @@ def splitImage(Image,scaleFactor):
     #print(width / 8)
     #print(height/ 8)
     #count = 0
+    return blocks
 
-def replace_image_with_avgs(Image,scaleFactor):
+def replaceImageWithAvgs(Image,scaleFactor):
     """
     Feature extraction -
     accesses the colour of the pixels in each block,
@@ -91,8 +83,8 @@ def replace_image_with_avgs(Image,scaleFactor):
 
                     #sumRGB = [(x[0]*x[1][0], x[0]*x[1][1], x[0]*x[1][2]) for x in all_pixels]
                     #col_avg = tuple([sum(x)/no_pixels for x in zip(*sumRGB)])
-
-                    col_avg = np.mean(all_pixels, axis=0) # find average colour of each block
+                    #col_avg = (50,50,50) # 10 seconds
+                    col_avg = np.mean(all_pixels, axis=0) # Averaging is O(no_blocks) #2mins # find average colour of each block
             #print()
         #    print(col_avg)
 
@@ -107,67 +99,61 @@ def replace_image_with_avgs(Image,scaleFactor):
                 break;
         if w + 2*sf > width:
             break;
-
-
-
-######################################################################
-
-
-
-
-        #if w + sf >= width - sf:
-        #    break;
-################################################################################
-
-
     # Save image of avgs
-    #cv.imwrite(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\AVGS.jpg',img)
+    cv.imwrite(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\AVGS.jpg',img)
     cv.imshow("img",img)
+    return img
 
-def searchTileDB(ImageDir)
+def readTileImages(imageDir):
+    """
+    Gather Tiles:
+    Read list of images from a directory and put in list
+    """
+    images = [] # List to store all tile image files
+    files = os.listdir(imageDir)
 
+    for file in files:
+        path = os.path.abspath(os.path.join(imageDir,file))
+        image = Image.open(path)
+        images.append(image)
+        print(images)
+    return images
+
+def averageRGB(Image):
+    """
+    Given a single Image, return avg colour (r,g,b)
+    """
+    img = np.array(Image)
+    width, height, col_pixels = img.shape[:3]
+    img.shape = (width * height,col_pixels)
+
+    return tuple(np.mean(img,axis=0))
+
+def getAVGsInDir(imgDir):
+    """
+    Gets the average RGB of tiles in the tile directory and appends them to a
+    list
+    """
+    avgs = []
+    for img in glob.iglob(imgDir + r'\*.jpg'):
+        image = cv.imread(img)
+        avg = averageRGB(image)
+        avgs.append(avg)
+    return avgs
+
+
+#def tileMatchAlgorithm(in_avg, avg):
+#    in_avg = 1
 
 
 def main():
-   img = cv.imread(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Original Dog image.png')
-   #img_Array = np.array(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Original Dog image.png')
-  # avg = getAverageRGB(img)
-   # w =900, h = 1440
-#   width,height,channels = img.shape[:3]
- #  strides = (width* size, size, width*size,size)
+   img = cv.imread('Original Dog image.png')
+   #averageRGB(img)
+  # getAVGsInDir(r"C:\Users\NFO\Desktop\Project\Test flowers")
    splitImage(img,50)
-   replace_image_with_avgs(img,50)
-  # new_col = [0,0,0]
-   #no_pixels = width * height
-   #scale_Factor = 8
-
-   # Make a grid
-   #dx,dy = scale_Factor
-   # Go through each pixel,
-
-  # for i  in range (0,width,scale_Factor):
-    #   for j in range (0,height,scale_Factor):
-
-    #       channels_xy = img[i,j] # Access colour of pixel in image
-    #       img[i,j] = (0,0,0)
-
-           #channels_xy = tuple(img.mean(axis=0))  # change colour to average color
-
-
-          # pixels[i,j] = getAverageRGB(img)
-          # r,g,b = img.getpixel((i,j))
-           #img.putpixel((i,j),55)
-
-
-
-  # print(no_pixels)
-  # cv.imshow("Original Dog image.png",img)
-
+   #replaceImageWithAvgs(img,8)
+   #readTileImages(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Test flowers')
    cv.waitKey(0)
-
-
-
 main()
-
 # I want something that loops through the image rows and cols, finds the average
 # RGB for that pixel and replaces the pixel with the average value

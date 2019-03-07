@@ -18,8 +18,14 @@ from PIL import Image
 def getFrameCount(videoFile):
     """ Helper method to calculate number of frames
         of an image """
+    frameCount = 0
     cap = cv.VideoCapture(videoFile)
-    frameCount = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+    length = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+    while(True):
+        ret,frame = cap.read()
+        if not ret:
+            break
+        frameCount += 1
     return frameCount
 
 def getFrameWidth(videoFile):
@@ -58,25 +64,14 @@ def splitVideoIntoFrames(videoFile):
         count += 1
         if cv.waitKey(5) & 0xFF == ord('q'):
             break;
-        if count > 27:
+        if count >= getFrameCount(videoFile):
             break;
         #    pass
     cap.release()
     cv.destroyAllWindows()  # destroy all the opened windows
 
-# def splitVideoIntoFrames(gif,dir):
-#     frame = Image.open(gif)
-#     nframes = 0;
-#     while frame:
-#         frame.save( '%s/%s-%s.jpg' % (dir, os.path.basename(gif), nframes ) , 'GIF')
-#         nframes +=1
-#         try:
-#             frame.seek(nframes)
-#         except EOFError:
-#                 break;
-#         return True
 
-def replace_image_with_avgs(Image,scaleFactor):
+def replaceImageWithAvgs(Image,scaleFactor):
     """
     Feature extraction -
     accesses the colour of the pixels in each block,
@@ -121,19 +116,29 @@ def replace_image_with_avgs(Image,scaleFactor):
     return img
     cv.imshow("img",img)
 
-def process_On_Video_Frames(imgDir):
+def processOnVideoFrames(imgDir, scl):
     print("Processing on video frames....")
     count = 0
     for img in glob.iglob(imgDir + r'\*.jpg'):
         image = cv.imread(img)
-        new_image = replace_image_with_avgs(image,8)
+        new_image = replaceImageWithAvgs(image,scl)
         cv.imwrite("Avg_frames%d.jpg" % count, new_image)
         cv.waitKey(0)
         cv.destroyAllWindows()
         count = count + 1
 
+def deleteFrames(imgDir):
+    """
+    remove the redundant frames
+    """
+    print("Deleting redundant frames...")
+    files = os.listdir(imgDir)
+    for file in files:
+        if file.endswith(".jpg"):
+            os.remove(file)
 
-def create_gif(input_imgDir, output_Dir):
+
+def createGif(input_imgDir, output_Dir):
     """
     Join individual frames to form a video
     """
@@ -151,11 +156,10 @@ def create_gif(input_imgDir, output_Dir):
 def main():
 
     #playVideo("concert2.gif")
-
     splitVideoIntoFrames("concert2.gif")
-
-    process_On_Video_Frames(r"C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Video frames")
-    create_gif(r"C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\Video frames","movie.gif")
+    processOnVideoFrames(r"C:\Users\NFO\Desktop\Project\Video frames", 8)
+    createGif(r"C:\Users\NFO\Desktop\Project\Video frames","movie.gif")
+    deleteFrames(r"C:\Users\NFO\Desktop\Project\Video frames")
 
 
 main()
