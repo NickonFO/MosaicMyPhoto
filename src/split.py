@@ -15,10 +15,10 @@ from statistics import mean
 #https://stackoverflow.com/questions/19062875/how-to-get-the-number-of-channels-from-an-image-in-opencv-2
 #https://stackoverflow.com/questions/13167269/changing-pixel-color-python
 
-def splitImage(Image,scaleFactor):
+def splitImage2(Image,scaleFactor):
     """
     Method to split image into blocks and display pixel values of the blocks
-    using np array and strides
+    using np array and strides.
     """
     img = np.array(Image)
 
@@ -36,7 +36,7 @@ def splitImage(Image,scaleFactor):
     #pyplot.imshow(img, interpolation='nearest')
     #pyplot.show()
     #no_blocks = 3
-    #print (blocks[1,1])
+    print (blocks[1,1])
     #print()
     #print(width / 8)
     #print(height/ 8)
@@ -132,21 +132,24 @@ def averageRGB(Image):
     Given a single Image, return avg colour (r,g,b)
     """
     img = np.array(Image)
-    width, height, col_pixels = img.shape[:3]
-    img.shape = (width * height,col_pixels)
+    #width, height, col_pixels = img.shape[:3]
+    #img.shape = (width * height,col_pixels)
 
-    return tuple(np.mean(img,axis=0))
+    return tuple(np.mean(img,axis=(0,1)))
+
 
 def getAVGsInDir(imgDir):
     """
-    Gets the average RGB of tiles in the tile directory and appends them to a
-    list
+    Gets the average RGB of jpeg tiles in the tile directory and appends them to a
+    list.
     """
     avgs = []
-    for img in glob.iglob(imgDir + r'\*.jpg'):
-        image = cv.imread(img)
+    for img in glob.iglob(imgDir + '/*.jpg'):
+        image = Image.open(img)
         avg = averageRGB(image)
+        #print(avg)
         avgs.append(avg)
+
     return avgs
 
 def resizeImage2(Image,sf):
@@ -166,79 +169,11 @@ def resizeImage(img,sf):
     return img
 
 
-
-def createImageGrid(images,width,height,col,row):
-    """
-    Creates a grid of resized tile images.
-    """
-    p_width = width // col
-    p_height = height // row
-    size = p_width, p_height
-
-    # Create blank canvas RGB image
-    new_im = np.zeros((width,height, 3), np.uint8)
-
-    new_im2 = np.zeros((width,height, 3), np.uint8)
-    new_im3 = np.zeros((width,height, 3), np.uint8)
-    # rows = []
-    # for i in range(row)
-    #     rows[i] =
-
-    #new_im = np.zeros(width,height)
-    imgs = []
-    for p in images:
-        tmp = resizeImage(p, p_width)
-        imgs.append(tmp)
-
-    #i = 0
-    x = 0
-    y = 0
-
-    # for c in range(col):
-    #     for r in range(row):
-    #         print(i, x, y)
-    #         new_im.paste(imgs[i], (x, y))
-    #         i += 1
-    #         y += p_height
-    #     x += p_width
-    #     y = 0
-
-    #for i in range(1, len(imgs)-1):
-
-    rows = []
-    k = 0
-    # for all photos (replace 9 with dynamic variable)
-    for i in range(9):
-        if i % col == 0: # if you are done with the row
-            if k > 0:
-                rows.append(cur_row)
-
-            cur_row = imgs[i]
-            k += 1
-        else:
-            cur_img = imgs[i]
-            cur_row = np.hstack(cur_row, cur_img)
-
-        #collage = rows[0]
-
-        for i in range(1, len(rows)):
-            collage = np.vstack([collage, rows[i]])
-
-    #return collage
-
-
-
-
-    cv.imshow("im",collage)
-        #imgs.append()
-    #grid_img = Image.new('RGB', (n*width, m*height))
-
-
-def createGrid(images, w, dims, imageSize):
+def createGrid(images, w, h, imageSize):
   """
   Create a grid of images given a list of tiles.
   """
-  m = dims
+  m = h
   n = w
   width = imageSize
   height = imageSize
@@ -262,29 +197,104 @@ def createGrid(images, w, dims, imageSize):
 
 
 # copied
-def tileMatchAlgorithm(in_avg, avgs):
-    """
-    Algorithm to find the index of the best matching tile using Euclidian distance
-    """
-    avg = in_avg
-    i = 0
-    min_i = 0
-    dist = 0
-    min_dist = float("inf")
-    for val in avgs:
-        # euclidian distance function
-        dist = ((val[0] - avg[0])*(val[0] - avg[0]) +
+# def tileMatchAlgorithm(in_avg, avgs):
+#     """
+#     Algorithm to find the index of the best matching tile using Euclidian distance
+#     """
+#     avg = in_avg
+#     i = 0
+#     min_i = 0
+#     dist = 0
+#     min_dist = float("inf")
+#     for val in avgs:
+#         # euclidian distance function
+#         dist = ((val[0] - avg[0])*(val[0] - avg[0]) +
+#             (val[1] - avg[1])*(val[1] - avg[1]) +
+#             (val[2] - avg[2])*(val[2] - avg[2]))
+#
+#         #dist = np.linalg.norm(val - avg)
+#     if dist < min_dist:
+#       min_dist = dist
+#       min_i = i
+#     i += 1
+#     return min_i
+def tileMatchAlgorithm(avg, avgs):
+  """
+  return index of best Image match based on RGB value distance
+  """
+
+  # get the closest RGB value to input, based on x/y/z distance
+  index = 0
+  min_index = 0
+  min_dist = float("inf")
+  for val in avgs:
+    dist = ((val[0] - avg[0])*(val[0] - avg[0]) +
             (val[1] - avg[1])*(val[1] - avg[1]) +
             (val[2] - avg[2])*(val[2] - avg[2]))
-
-        #np.linalg.norm(val - avg)
     if dist < min_dist:
       min_dist = dist
-      min_i = i
-    i += 1
-    return min_i
+      min_index = index
+    index += 1
 
-def mosaic(target_image, tile_images):
+  return min_index
+# def tileMatchAlgorithm(in_avg,avgs):
+#     """
+#     Algorithm to find the index of the best matching tile using Euclidian distance
+#     """
+#     i = 0
+#     min_i = 0
+#     dist = 0
+#     min_dist = float("inf")
+#     for val in avgs:
+#             numpy.sum(())
+
+def splitImage(image, blockdims):
+  """
+  Splits image into blocks and returns a list of sub images
+  """
+  # list of sub images
+  sub_images = []
+
+  width = image.size[0]
+  height = image.size[1]
+  m = blockdims
+  n = blockdims
+  w, h = int(width/n), int(height/m)
+
+  # generate list of dimensions
+  for j in range(m):
+    for i in range(n):
+      # add cropped images to array
+      sub_images.append(image.crop((i*w, j*h, (i+1)*w, (j+1)*h)))
+  return sub_images
+
+def mosaicMaker(image, tile_dir, tile_size, gridWidth, gridHeight):
+    """
+    Create the photomosaic.
+    """
+    # Create a list of images for the output
+    output = []
+    # Create a list of tile images
+    tiles = readTileImages(tile_dir)
+    # divide the source image
+    image_blocks = splitImage(image, tile_size)
+
+    # Get a list of averages for the Tiles
+    tile_avgs = getAVGsInDir(tile_dir)
+    #print (tile_avgs)
+    #tile_avgs = []
+    #for img in tile_dir:
+    #    tile_avgs.append(averageRGB(img))
+    # get averages of the target image blocks
+    for block in image_blocks:
+        block_avg = averageRGB(block)
+        # find the index of the best matching block with the tile
+        index = tileMatchAlgorithm(block_avg,tile_avgs)
+        #print(index)
+        output.append(tiles[index])
+    mosaic = createGrid(output, gridWidth, gridHeight, tile_size)
+
+    return mosaic
 
 
 #def mosaicCreator(target_image, tile_images):
@@ -318,7 +328,7 @@ def mosaic(target_image, tile_images):
     #mosaic = createGrid(output_images,8)
 
 
-    return mosaic
+    #return mosaic
     # for each block
     #for i in
     # get tile averages
@@ -329,12 +339,28 @@ def mosaic(target_image, tile_images):
 
 
 def main():
-    img = cv.imread('GermanShep.jpeg')
-    images = readTileImages(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\apmw_flowers')
+    img = Image.open('GermanShep.jpeg')
+    split = splitImage(img, 20)
 
+    #print(averageRGB(split[15]))
+
+    images = readTileImages(r'C:\Users\NFO\Desktop\Project\apmw_flowers')
+    #getAVGsInDir(r'C:\Users\NFO\Desktop\Project\Test flowers')
+
+
+    # split = []
+    # split.append(splitImage(img,30))
+    # cv.imshow(split[1])
+    Mos = mosaicMaker(img, r'C:\Users\NFO\Desktop\Project\apmw_flowers', 50, 50, 50)
+    Mos.show()
+
+    #cv.imshow("Mos",Mos)
+    #print(getAVGsInDir(r'C:\Users\NFO\Desktop\Project\Test flowers'))
+    #split = splitImage(img,8)
+    #print(split)
     #cv.imshow(splitImage(img,8))
-    grid = createGrid(images,50, 36,30)
-    grid.show()
+    #grid = createGrid(images,50, 36,30)
+    #grid.show()
     #mos = mosaicCreator(img,images)
     #mos.show()
 
