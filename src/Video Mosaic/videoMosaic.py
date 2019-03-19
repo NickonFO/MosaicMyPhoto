@@ -110,7 +110,6 @@ def replaceImageWithAvgs(Image,scaleFactor):
         if w + 2*sf > width:
             break;
 
-
     # Save image of avgs
     #cv.imwrite(r'C:\Users\NFO\Desktop\Uni\3rd Year\3rd year project rescources\Code\VideoFrames\AVGS.jpg',img)
     return img
@@ -150,16 +149,37 @@ def createGif(input_imgDir, output_Dir):
             if filename.endswith('.jpg'):
                 path = os.path.join(input_imgDir,filename)
                 images.append(imageio.imread(path))
-                #print(images)
     imageio.mimsave(output_Dir, images)
 
 def main():
+    #parser = argparse.ArgumentParser()
+    # Arguments
+    #parser.add_argument('--target-video', dest = 'target_video', required = True)
+    #parser.add_argument('--input-directory', dest = 'input_directory', required = True)
+    #parser.add_argument('--scale-factor', dest = 'scale_factor', required = False)
+    #parser.add_argument('--output-file', dest='outfile', required=True)
+    #args = parser.parse_args()
 
-    #playVideo("concert2.gif")
-    splitVideoIntoFrames("concert2.gif")
-    processOnVideoFrames(r"C:\Users\NFO\Desktop\Project\Video frames", 8)
-    createGif(r"C:\Users\NFO\Desktop\Project\Video frames","movie.gif")
-    deleteFrames(r"C:\Users\NFO\Desktop\Project\Video frames")
+    #splitVideoIntoFrames(target_video)
+    #processOnVideoFrames(input_directory,8)
+    #createGif(input_directory, 'movie.gif')
+    #deleteFrames(input_directory)
+    #splitVideoIntoFrames("psychcat.gif")
+    #processOnVideoFrames(r"C:\Users\NFO\Desktop\Project\Video frames", 8)
+    #createGif(r"C:\Users\NFO\Desktop\Project\Video frames","movie.gif")
+    #deleteFrames(r"C:\Users\NFO\Desktop\Project\Video frames")
 
+    #### INPUT ARGUMENTS
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--target-video', dest= 'target_video',required = True)
+    parser.add_argument('--input-dir',dest = 'input_directory',required = True)
+    parser.add_argument('--scale-factor',dest ='scl',type=int,required=True)
+    parser.add_argument('--output-file', dest= 'output',required=True)
+
+    args = parser.parse_args()
+    splitVideoIntoFrames(args.target_video)
+    processOnVideoFrames(args.input_directory,args.scl)
+    createGif(args.input_directory,args.output)
+    deleteFrames(args.input_directory)
 
 main()

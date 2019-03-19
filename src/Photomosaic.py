@@ -1,4 +1,5 @@
 import numpy as np
+import argparse
 import scipy as sc
 import cv2 as cv
 import matplotlib as plt
@@ -196,28 +197,7 @@ def createGrid(images, w, h, imageSize):
   return grid_img
 
 
-# copied
-# def tileMatchAlgorithm(in_avg, avgs):
-#     """
-#     Algorithm to find the index of the best matching tile using Euclidian distance
-#     """
-#     avg = in_avg
-#     i = 0
-#     min_i = 0
-#     dist = 0
-#     min_dist = float("inf")
-#     for val in avgs:
-#         # euclidian distance function
-#         dist = ((val[0] - avg[0])*(val[0] - avg[0]) +
-#             (val[1] - avg[1])*(val[1] - avg[1]) +
-#             (val[2] - avg[2])*(val[2] - avg[2]))
-#
-#         #dist = np.linalg.norm(val - avg)
-#     if dist < min_dist:
-#       min_dist = dist
-#       min_i = i
-#     i += 1
-#     return min_i
+
 def tileMatchAlgorithm(avg, avgs):
   """
   return index of best Image match based on RGB value distance
@@ -228,6 +208,7 @@ def tileMatchAlgorithm(avg, avgs):
   min_index = 0
   min_dist = float("inf")
   for val in avgs:
+    #dist = np.sqrt(np.sum((val-avg)**2))
     dist = ((val[0] - avg[0])*(val[0] - avg[0]) +
             (val[1] - avg[1])*(val[1] - avg[1]) +
             (val[2] - avg[2])*(val[2] - avg[2]))
@@ -296,63 +277,18 @@ def mosaicMaker(image, tile_dir, tile_size, gridWidth, gridHeight):
 
     return mosaic
 
-
-#def mosaicCreator(target_image, tile_images):
-#    """
-#    Creates the photomosaic.
-#    """
-    # output images
-#    output_images = []
-    # Empty canvas to overlay mosaic
-    #mosaic = np.zeros((target_image.shape))
-
-    # divide source image
-    #target_image = splitImage(target_image,8)
-
-    # Get a list of average RGB's from directory
-    #tile_avgs = getAVGsInDir(tile_images)
-
-    # get list of averages for target image
-    #avg = replaceImageWithAvgs(target_image,8)
-    #for img in tile_images:
-        #img = cv.imread(img)
-        #tile_avgs = averageRGB(img)
-                # target sub-image average
-
-
-
-        # find match index
-        #match_index = tileMatchAlgorithm(avg, tile_avgs)
-        #output_images.append(tile_images[match_index])
-
-    #mosaic = createGrid(output_images,8)
-
-
-    #return mosaic
-    # for each block
-    #for i in
-    # get tile averages
-    #getAVGsInDir(tile_images)
-
-
-
-
-
 def main():
-    img = Image.open('GermanShep.jpeg')
-    split = splitImage(img, 20)
+    parser = argparse.ArgumentParser()
 
-    #print(averageRGB(split[15]))
+    parser.add_argument("--tiles", dest ='tiles', type=str, required=True,help="Folder of tile images")
+    parser.add_argument("--target-image",dest='target',type=str,required=True,help="Target image of mosaic")
+    parser.add_argument("--tile-size",dest='tile_size',type=int,required=True,help="size of your tiles")
+    parser.add_argument("--grid-size",dest='grid_size',type=int,required=True,help="grid size")
+    args = parser.parse_args()
+    img = Image.open(args.target)
 
-    images = readTileImages(r'C:\Users\NFO\Desktop\Project\apmw_flowers')
-    #getAVGsInDir(r'C:\Users\NFO\Desktop\Project\Test flowers')
-
-
-    # split = []
-    # split.append(splitImage(img,30))
-    # cv.imshow(split[1])
-    Mos = mosaicMaker(img, r'C:\Users\NFO\Desktop\Project\apmw_flowers', 50, 50, 50)
-    Mos.show()
+    mosaic = mosaicMaker(img,args.tiles,args.tile_size ,args.grid_size,args.grid_size)
+    mosaic.show()
 
     #cv.imshow("Mos",Mos)
     #print(getAVGsInDir(r'C:\Users\NFO\Desktop\Project\Test flowers'))
