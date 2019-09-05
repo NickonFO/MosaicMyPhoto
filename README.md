@@ -6,5 +6,6 @@ Fundementals of python programming, using the open CV and PIL libraries, working
 Using web scrapers
 
 # Some results
-![alt text](https://github.com/MosaicMyPhoto/src/Images%20and%20videos/PhotoMosaic%20results/Mosaic.jpg)
+# Image mosaics
+![alt text](https://github.com/NickonFO/MosaicMyPhoto/blob/master/src/Images%20and%20videos/PhotoMosaic%20results/Mosaic.jpg)
 
