@@ -9,3 +9,12 @@ Using web scrapers
 # Image mosaics
 ![alt text](https://github.com/NickonFO/MosaicMyPhoto/blob/master/src/Images%20and%20videos/PhotoMosaic%20results/Mosaic.jpg)
 
+![alt text]
+(https://github.com/NickonFO/MosaicMyPhoto/blob/master/src/Images%20and%20videos/PhotoMosaic%20results/Mosaic2.jpg)
+
+# Video mosaics
+![alt text](https://github.com/NickonFO/MosaicMyPhoto/blob/master/src/Images%20and%20videos/video%20Mosaic%20results/vangoghmosaic_resized.gif)
+
+![alt text](https://github.com/NickonFO/MosaicMyPhoto/blob/master/src/Images%20and%20videos/video%20Mosaic%20results/catmosaic.gif)
+
+
