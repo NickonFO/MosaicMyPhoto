@@ -1,2 +1,7 @@
 # MosaicMyPhoto
-My photo Mosaic project for third year Computer Science
+My attempt at creating a photo mosaic program in python, and extending this program by creating mosaics of videos.
+
+# What I learnt
+Fundementals of python programming, using the open CV and PIL libraries, working with images and videos in python
+Using web scrapers
+
