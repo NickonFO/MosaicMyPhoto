@@ -3,7 +3,7 @@ My attempt at creating a photo mosaic program in python, and extending this prog
 
 # What I learnt
 - Fundementals of python programming. 
-- using the open CV and PIL libraries to work with images and videos in python.
+- using the open CV and PIL libraries to work with images and videos in python in conjunction with creating various image processing algorithms.
 - Using web scrapers.
 
 # Some results
